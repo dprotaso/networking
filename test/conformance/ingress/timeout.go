@@ -20,21 +20,24 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"testing"
 	"time"
 
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"knative.dev/networking/pkg/apis/networking/v1alpha1"
 	"knative.dev/networking/test"
+	"knative.dev/networking/test/conformance"
 )
 
 // TestTimeout verifies that an Ingress implements "no timeout".
-func TestTimeout(t *test.T) {
-	t.Parallel()
+func TestTimeout(ctx context.Context, tt *testing.T) {
+	tt.Parallel()
+	t := conformance.TFromContext(ctx)
 
-	name, port, _ := CreateTimeoutService(t.C, t, t.Clients)
+	name, port, _ := CreateTimeoutService(ctx, t)
 
 	// Create a simple Ingress over the Service.
-	_, client, _ := CreateIngressReady(t.C, t, t.Clients, v1alpha1.IngressSpec{
+	_, client, _ := CreateIngressReady(ctx, t, v1alpha1.IngressSpec{
 		Rules: []v1alpha1.IngressRule{{
 			Hosts:      []string{name + ".example.com"},
 			Visibility: v1alpha1.IngressVisibilityExternalIP,
@@ -73,8 +76,9 @@ func TestTimeout(t *test.T) {
 	}}
 
 	for _, c := range cases {
-		t.Run(c.name, func(t *test.T) {
-			checkTimeout(t.C, t, client, name, c.code, c.initialDelay, c.delay)
+		t.Run(c.name, func(ttt *testing.T) {
+			t := t.Instance(ttt) // TODO: this will not work...
+			checkTimeout(ctx, t, client, name, c.code, c.initialDelay, c.delay)
 		})
 	}
 }

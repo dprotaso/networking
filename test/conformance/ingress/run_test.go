@@ -19,11 +19,36 @@ limitations under the License.
 package ingress
 
 import (
+	"context"
+	"flag"
+	"knative.dev/networking/test/conformance"
+	"os"
 	"testing"
 
-	"knative.dev/networking/test/globals"
+	networkingtest "knative.dev/networking/test"
+	"knative.dev/reconciler-test/pkg/test"
+	"knative.dev/reconciler-test/rigging/v2"
 )
 
+var global rigging.GlobalEnvironment
+var nt = &networkingtest.T{}
+
+func TestMain(m *testing.M) {
+	global = test.NewGlobalEnvironment()
+
+	global.WithFlags(nt.InitFlags) // TODO: maybe this moves into NewEnv?
+	global.InitFlags(flag.CommandLine)
+	flag.Parse()
+
+	os.Exit(m.Run())
+}
+
 func TestIngressConformance(t *testing.T) {
-	RunConformance(globals.NewT(t))
+	ctx := context.Background() // This should be the injection context.
+
+	nt.T = t // TODO: THIS IS SUPER UNSAFE. YOLO
+	ctx = conformance.WithT(ctx, nt)
+
+	run := test.NewRunner(global.Environment()) // NewRunner is an instance of the environment for this test.
+	run.Test(ctx, t, Conformance())
 }

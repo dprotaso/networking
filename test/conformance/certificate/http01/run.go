@@ -16,9 +16,15 @@ limitations under the License.
 
 package http01
 
-import "knative.dev/networking/test"
+import (
+	"knative.dev/reconciler-test/rigging/v2"
+)
 
-func RunConformance(t *test.T) {
-	// TODO - is this stable?
-	t.Run("http01", TestHTTP01Challenge)
+func Conformance() *rigging.Feature {
+	f := new(rigging.Feature)
+
+	f.Stable("HTTP01 Conformance").
+		Must("http01", TestHTTP01Challenge)
+
+	return f
 }

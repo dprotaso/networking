@@ -17,23 +17,27 @@ limitations under the License.
 package ingress
 
 import (
+	"context"
+	"testing"
+
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"knative.dev/networking/pkg/apis/networking"
 	"knative.dev/networking/pkg/apis/networking/v1alpha1"
-	"knative.dev/networking/test"
+	"knative.dev/networking/test/conformance"
 )
 
 // TestIngressTLS verifies that the Ingress properly handles the TLS field.
-func TestIngressTLS(t *test.T) {
-	t.Parallel()
+func TestIngressTLS(ctx context.Context, tt *testing.T) {
+	tt.Parallel()
+	t := conformance.TFromContext(ctx)
 
-	name, port, _ := CreateRuntimeService(t.C, t, t.Clients, networking.ServicePortNameHTTP1)
+	name, port, _ := CreateRuntimeService(ctx, t, networking.ServicePortNameHTTP1)
 
 	hosts := []string{name + ".example.com"}
 
-	secretName, _ := CreateTLSSecret(t.C, t, t.Clients, hosts)
+	secretName, _ := CreateTLSSecret(ctx, t, hosts)
 
-	_, client, _ := CreateIngressReady(t.C, t, t.Clients, v1alpha1.IngressSpec{
+	_, client, _ := CreateIngressReady(ctx, t, v1alpha1.IngressSpec{
 		Rules: []v1alpha1.IngressRule{{
 			Hosts:      hosts,
 			Visibility: v1alpha1.IngressVisibilityExternalIP,
@@ -56,12 +60,14 @@ func TestIngressTLS(t *test.T) {
 		}},
 	})
 
-	t.Run("verify HTTP", func(t *test.T) {
-		RuntimeRequest(t.C, t, client, "http://"+name+".example.com")
+	t.Run("verify HTTP", func(ttt *testing.T) {
+		t := t.Instance(ttt) // TODO: this will not work...
+		RuntimeRequest(ctx, t, client, "http://"+name+".example.com")
 	})
 
-	t.Run("verify HTTPS", func(t *test.T) {
-		RuntimeRequest(t.C, t, client, "https://"+name+".example.com")
+	t.Run("verify HTTPS", func(ttt *testing.T) {
+		t := t.Instance(ttt) // TODO: this will not work...
+		RuntimeRequest(ctx, t, client, "https://"+name+".example.com")
 	})
 }
 

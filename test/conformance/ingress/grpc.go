@@ -22,6 +22,7 @@ import (
 	"math/rand"
 	"net"
 	"strings"
+	"testing"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
@@ -30,20 +31,22 @@ import (
 	"k8s.io/apimachinery/pkg/util/sets"
 	"knative.dev/networking/pkg/apis/networking/v1alpha1"
 	"knative.dev/networking/test"
+	"knative.dev/networking/test/conformance"
 	ping "knative.dev/networking/test/test_images/grpc-ping/proto"
 )
 
 // TestGRPC verifies that GRPC may be used via a simple Ingress.
-func TestGRPC(t *test.T) {
-	t.Parallel()
+func TestGRPC(ctx context.Context, tt *testing.T) {
+	tt.Parallel()
+	t := conformance.TFromContext(ctx)
 
 	const suffix = "- pong"
-	name, port, _ := CreateGRPCService(t.C, t, t.Clients, suffix)
+	name, port, _ := CreateGRPCService(ctx, t, suffix)
 
 	domain := name + ".example.com"
 
 	// Create a simple Ingress over the Service.
-	_, dialCtx, _ := createIngressReadyDialContext(t.C, t, t.Clients, v1alpha1.IngressSpec{
+	_, dialCtx, _ := createIngressReadyDialContext(ctx, t, v1alpha1.IngressSpec{
 		Rules: []v1alpha1.IngressRule{{
 			Hosts:      []string{domain},
 			Visibility: v1alpha1.IngressVisibilityExternalIP,
@@ -74,7 +77,7 @@ func TestGRPC(t *test.T) {
 	defer conn.Close()
 	pc := ping.NewPingServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(t.C, 60*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 
 	stream, err := pc.PingStream(ctx)
@@ -88,14 +91,15 @@ func TestGRPC(t *test.T) {
 }
 
 // TestGRPCSplit verifies that websockets may be used across a traffic split.
-func TestGRPCSplit(t *test.T) {
-	t.Parallel()
+func TestGRPCSplit(ctx context.Context, tt *testing.T) {
+	tt.Parallel()
+	t := conformance.TFromContext(ctx)
 
 	const suffixBlue = "- blue"
-	blueName, bluePort, _ := CreateGRPCService(t.C, t, t.Clients, suffixBlue)
+	blueName, bluePort, _ := CreateGRPCService(ctx, t, suffixBlue)
 
 	const suffixGreen = "- green"
-	greenName, greenPort, _ := CreateGRPCService(t.C, t, t.Clients, suffixGreen)
+	greenName, greenPort, _ := CreateGRPCService(ctx, t, suffixGreen)
 
 	// The suffixes we expect to see.
 	want := sets.NewString(suffixBlue, suffixGreen)
@@ -103,7 +107,7 @@ func TestGRPCSplit(t *test.T) {
 	// Create a simple Ingress over the Service.
 	name := test.ObjectNameForTest(t)
 	domain := name + ".example.com"
-	_, dialCtx, _ := createIngressReadyDialContext(t.C, t, t.Clients, v1alpha1.IngressSpec{
+	_, dialCtx, _ := createIngressReadyDialContext(ctx, t, v1alpha1.IngressSpec{
 		Rules: []v1alpha1.IngressRule{{
 			Hosts:      []string{domain},
 			Visibility: v1alpha1.IngressVisibilityExternalIP,
@@ -142,7 +146,7 @@ func TestGRPCSplit(t *test.T) {
 	defer conn.Close()
 	pc := ping.NewPingServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(t.C, 60*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 
 	const maxRequests = 100

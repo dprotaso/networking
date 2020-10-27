@@ -19,11 +19,36 @@ limitations under the License.
 package http01
 
 import (
+	"context"
+	"flag"
+	"os"
 	"testing"
 
-	"knative.dev/networking/test/globals"
+	networkingtest "knative.dev/networking/test"
+	"knative.dev/networking/test/conformance"
+	"knative.dev/reconciler-test/pkg/test"
+	"knative.dev/reconciler-test/rigging/v2"
 )
 
-func TestCertificateConformance(t *testing.T) {
-	RunConformance(globals.NewT(t))
+var global rigging.GlobalEnvironment
+var nt = &networkingtest.T{}
+
+func TestMain(m *testing.M) {
+	global := test.NewGlobalEnvironment()
+
+	global.WithFlags(nt.InitFlags) // TODO: maybe this moves into NewEnv?
+	global.InitFlags(flag.CommandLine)
+	flag.Parse()
+
+	os.Exit(m.Run())
+}
+
+func TestHTTP01Conformance(t *testing.T) {
+	ctx := context.Background() // This should be the injection context.
+
+	nt.T = t // TODO: THIS IS SUPER UNSAFE. YOLO
+	ctx = conformance.WithT(ctx, nt)
+
+	run := test.NewRunner(global.Environment()) // NewRunner is an instance of the environment for this test.
+	run.Test(ctx, t, Conformance())
 }

@@ -14,26 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package globals
+package conformance
 
 import (
-	"flag"
-	"testing"
-
-	"knative.dev/networking/test"
+	"context"
+	networkingtest "knative.dev/networking/test"
 )
 
-// This package is here for convenience of downstream tests runners
-var conformanceT *test.T
+type tKey struct{}
 
-func init() {
-	conformanceT = &test.T{}
-	conformanceT.AddFlags(flag.CommandLine)
+func WithT(ctx context.Context, t *networkingtest.T) context.Context {
+	return context.WithValue(ctx, tKey{}, t)
 }
 
-// Return a shallow copy
-func NewT(t *testing.T) *test.T {
-	c := *conformanceT
-	test.Init(&c, t)
-	return &c
+func TFromContext(ctx context.Context) *networkingtest.T {
+	if t, ok := ctx.Value(tKey{}).(*networkingtest.T); ok {
+		return t
+	}
+	panic("no T found in context")
 }

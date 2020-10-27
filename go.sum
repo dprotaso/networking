@@ -56,7 +56,6 @@ contrib.go.opencensus.io/exporter/aws v0.0.0-20181029163544-2befc13012d0/go.mod 
 contrib.go.opencensus.io/exporter/ocagent v0.4.12/go.mod h1:450APlNTSR6FrvC3CTRqYosuDstRB9un7SOx2k/9ckA=
 contrib.go.opencensus.io/exporter/ocagent v0.5.0/go.mod h1:ImxhfLRpxoYiSq891pBrLVhN+qmP8BTVvdH2YLs7Gl0=
 contrib.go.opencensus.io/exporter/ocagent v0.6.0/go.mod h1:zmKjrJcdo0aYcVS7bmEeSEBLPA9YJp5bjrofdU3pIXs=
-contrib.go.opencensus.io/exporter/ocagent v0.7.1-0.20200615190824-f8c219d2d895/go.mod h1:IshRmMJBhDfFj5Y67nVhMYTTIze91RUeT73ipWKs/GY=
 contrib.go.opencensus.io/exporter/ocagent v0.7.1-0.20200907061046-05415f1de66d h1:LblfooH1lKOpp1hIhukktmSAxFkqMPFk9KR6iZ0MJNI=
 contrib.go.opencensus.io/exporter/ocagent v0.7.1-0.20200907061046-05415f1de66d/go.mod h1:IshRmMJBhDfFj5Y67nVhMYTTIze91RUeT73ipWKs/GY=
 contrib.go.opencensus.io/exporter/prometheus v0.1.0 h1:SByaIoWwNgMdPSgl5sMqM2KDE5H/ukPWBRo314xiDvg=
@@ -1595,7 +1594,6 @@ golang.org/x/tools v0.0.0-20200709181711-e327e1019dfe/go.mod h1:njjCfa9FT2d7l9Bc
 golang.org/x/tools v0.0.0-20200713011307-fd294ab11aed/go.mod h1:njjCfa9FT2d7l9Bc6FUM5FLjQPp3cFF28FI3qnDFljA=
 golang.org/x/tools v0.0.0-20200725200936-102e7d357031/go.mod h1:njjCfa9FT2d7l9Bc6FUM5FLjQPp3cFF28FI3qnDFljA=
 golang.org/x/tools v0.0.0-20200729194436-6467de6f59a7/go.mod h1:njjCfa9FT2d7l9Bc6FUM5FLjQPp3cFF28FI3qnDFljA=
-golang.org/x/tools v0.0.0-20200731060945-b5fad4ed8dd6/go.mod h1:njjCfa9FT2d7l9Bc6FUM5FLjQPp3cFF28FI3qnDFljA=
 golang.org/x/tools v0.0.0-20200804011535-6c149bb5ef0d/go.mod h1:njjCfa9FT2d7l9Bc6FUM5FLjQPp3cFF28FI3qnDFljA=
 golang.org/x/tools v0.0.0-20200825202427-b303f430e36d/go.mod h1:njjCfa9FT2d7l9Bc6FUM5FLjQPp3cFF28FI3qnDFljA=
 golang.org/x/tools v0.0.0-20200828161849-5deb26317202 h1:DrWbY9UUFi/sl/3HkNVoBjDbGfIPZZfgoGsGxOL1EU8=
@@ -1874,17 +1872,15 @@ knative.dev/pkg v0.0.0-20200505191044-3da93ebb24c2/go.mod h1:Q6sL35DdGs8hIQZKdaC
 knative.dev/pkg v0.0.0-20200515002500-16d7b963416f/go.mod h1:tMOHGbxtRz8zYFGEGpV/bpoTEM1o89MwYFC4YJXl3GY=
 knative.dev/pkg v0.0.0-20200528142800-1c6815d7e4c9/go.mod h1:QgNZTxnwpB/oSpNcfnLVlw+WpEwwyKAvJlvR3hgeltA=
 knative.dev/pkg v0.0.0-20200711004937-22502028e31a/go.mod h1:AqAJV6rYi8IGikDjJ/9ZQd9qKdkXVlesVnVjwx62YB8=
-knative.dev/pkg v0.0.0-20200916171541-6e0430fd94db/go.mod h1:ZV1kWD8UMvELVVDld0PDRdjwdCsGwEwf1YUvGGDUl2c=
+knative.dev/pkg v0.0.0-20201020163359-385c8b9c0e97/go.mod h1:Gd7eJYKYPveffVad0/wImHpQSYn+Pt9q09HGJyL/b54=
 knative.dev/pkg v0.0.0-20201021200832-f492d0877abf h1:WmepjYVvRFzJthX/t5YU6fNgkEUOcAYTFWen7nJVofs=
 knative.dev/pkg v0.0.0-20201021200832-f492d0877abf/go.mod h1:8Ryvgpx71FnHPVaB+DEXEKOJfA/sc9iO8mjoKxsrIiE=
-knative.dev/reconciler-test v0.0.0-20201019181059-6930dc6e06b8 h1:0rxepawwI4InGztBvp9do6Bdlutn7v0OrzkqDen/Rv8=
-knative.dev/reconciler-test v0.0.0-20201019181059-6930dc6e06b8/go.mod h1:F7Y6JPBUKHiWOPCKNFcZB+e85AZhZUvf40APlxdpL/I=
 knative.dev/test-infra v0.0.0-20200407185800-1b88cb3b45a5/go.mod h1:xcdUkMJrLlBswIZqL5zCuBFOC22WIPMQoVX1L35i0vQ=
 knative.dev/test-infra v0.0.0-20200505052144-5ea2f705bb55/go.mod h1:WqF1Azka+FxPZ20keR2zCNtiQA1MP9ZB4BH4HuI+SIU=
 knative.dev/test-infra v0.0.0-20200513011557-d03429a76034/go.mod h1:aMif0KXL4g19YCYwsy4Ocjjz5xgPlseYV+B95Oo4JGE=
 knative.dev/test-infra v0.0.0-20200519015156-82551620b0a9/go.mod h1:A5b2OAXTOeHT3hHhVQm3dmtbuWvIDP7qzgtqxA3/2pE=
 knative.dev/test-infra v0.0.0-20200707183444-aed09e56ddc7/go.mod h1:RjYAhXnZqeHw9+B0zsbqSPlae0lCvjekO/nw5ZMpLCs=
-knative.dev/test-infra v0.0.0-20200911201000-3f90e7c8f2fa/go.mod h1:Pmg2c7Z7q7BGFUV/GOpU5BlrD3ePJft4MPqx8AYBplc=
+knative.dev/test-infra v0.0.0-20201015231956-d236fb0ea9ff/go.mod h1:lm0U0k6ARXr8Po0LcSTCfETg63LOF3ajUxcoqy5JSH0=
 knative.dev/test-infra v0.0.0-20201020210659-8f5dc4814ac3/go.mod h1:lm0U0k6ARXr8Po0LcSTCfETg63LOF3ajUxcoqy5JSH0=
 knative.dev/test-infra v0.0.0-20201022003632-7d3ea6019158 h1:i6DIeWY1imJVNS6OH+VcBvYpVOkYWDe/AR2rUYTxcxE=
 knative.dev/test-infra v0.0.0-20201022003632-7d3ea6019158/go.mod h1:lm0U0k6ARXr8Po0LcSTCfETg63LOF3ajUxcoqy5JSH0=

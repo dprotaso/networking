@@ -17,35 +17,42 @@ limitations under the License.
 package ingress
 
 import (
-	"knative.dev/networking/test"
+	rigging "knative.dev/reconciler-test/rigging/v2"
 )
 
 // RunConformance will run ingress conformance tests
 //
 // Depending on the options it may test alpha and beta features
-func RunConformance(t *test.T) {
-	t.Stable("basics", TestBasics)
-	t.Stable("basics/http2", TestBasicsHTTP2)
-	t.Stable("grpc", TestGRPC)
-	t.Stable("grpc/split", TestGRPCSplit)
-	t.Stable("headers/pre-split", TestPreSplitSetHeaders)
-	t.Stable("headers/post-split", TestPostSplitSetHeaders)
-	t.Stable("hosts/multiple", TestMultipleHosts)
-	t.Stable("dispatch/path", TestPath)
-	t.Stable("dispatch/percentage", TestPercentage)
-	t.Stable("dispatch/path_and_percentage", TestPathAndPercentageSplit)
-	t.Stable("timeout", TestTimeout)
-	t.Stable("tls", TestIngressTLS)
-	t.Stable("update", TestUpdate)
-	t.Stable("visibility", TestVisibility)
-	t.Stable("visibility/split", TestVisibilitySplit)
-	t.Stable("visibility/path", TestVisibilityPath)
-	t.Stable("ingressclass", TestIngressClass)
-	t.Stable("websocket", TestWebsocket)
-	t.Stable("websocket/split", TestWebsocketSplit)
+func Conformance() *rigging.Feature {
+	f := new(rigging.Feature)
 
-	t.Beta("headers/probe", TestProbeHeaders)
+	f.Stable("Ingress Conformance").
+		Must("basics", TestBasics).
+		Must("basics/http2", TestBasicsHTTP2).
+		Must("grpc", TestGRPC).
+		Must("grpc/split", TestGRPCSplit).
+		Must("headers/pre-split", TestPreSplitSetHeaders).
+		Must("headers/post-split", TestPostSplitSetHeaders).
+		Must("hosts/multiple", TestMultipleHosts).
+		Must("dispatch/path", TestPath).
+		Must("dispatch/percentage", TestPercentage).
+		Must("dispatch/path_and_percentage", TestPathAndPercentageSplit).
+		Must("timeout", TestTimeout).
+		Must("tls", TestIngressTLS).
+		Must("update", TestUpdate).
+		Must("visibility", TestVisibility).
+		Must("visibility/split", TestVisibilitySplit).
+		Must("visibility/path", TestVisibilityPath).
+		Must("ingressclass", TestIngressClass).
+		Must("websocket", TestWebsocket).
+		Must("websocket/split", TestWebsocketSplit)
 
-	t.Alpha("headers/tag", TestTagHeaders)
-	t.Alpha("host-rewrite", TestRewriteHost)
+	f.Beta("Conformance").
+		Should("headers/probe", TestProbeHeaders)
+
+	f.Alpha("Conformance").
+		May("headers/tag", TestTagHeaders).
+		May("host-rewrite", TestRewriteHost)
+
+	return f
 }

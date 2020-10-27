@@ -17,22 +17,29 @@ limitations under the License.
 package nonhttp01
 
 import (
+	"context"
+	"testing"
+
 	"knative.dev/networking/test"
+	"knative.dev/networking/test/conformance"
 	utils "knative.dev/networking/test/conformance/certificate"
 )
 
 // TestSecret verifies that a certificate creates a secret
-func TestSecret(t *test.T) {
+func TestSecret(ctx context.Context, tt *testing.T) {
+	tt.Parallel()
+	t := conformance.TFromContext(ctx)
+
 	certName := test.ObjectNameForTest(t) + ".example.com"
 
-	cert := utils.CreateCertificate(t.C, t, t.Clients, []string{certName})
+	cert := utils.CreateCertificate(ctx, t, []string{certName})
 
 	t.Logf("Waiting for Certificate %q to transition to Ready", cert.Name)
-	if err := utils.WaitForCertificateState(t.C, t.Clients.NetworkingClient, cert.Name, utils.IsCertificateReady, "CertificateIsReady"); err != nil {
+	if err := utils.WaitForCertificateState(ctx, t.Clients.NetworkingClient, cert.Name, utils.IsCertificateReady, "CertificateIsReady"); err != nil {
 		t.Fatal("Error waiting for the certificate to become ready for the latest revision:", err)
 	}
 
-	err := utils.WaitForCertificateSecret(t.C, t, t.Clients, cert, t.Name())
+	err := utils.WaitForCertificateSecret(ctx, t, cert, t.Name())
 	if err != nil {
 		t.Error("Failed to wait for secret:", err)
 	}

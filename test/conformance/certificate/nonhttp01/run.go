@@ -16,9 +16,15 @@ limitations under the License.
 
 package nonhttp01
 
-import "knative.dev/networking/test"
+import (
+	"knative.dev/reconciler-test/rigging/v2"
+)
 
-func RunConformance(t *test.T) {
-	// TODO - is this stable?
-	t.Run("secret", TestSecret)
+func Conformance() *rigging.Feature {
+	f := new(rigging.Feature)
+
+	f.Stable("Non-HTTP01 Conformance").
+		Must("secret", TestSecret)
+
+	return f
 }

@@ -18,6 +18,7 @@ package ingress
 
 import (
 	"context"
+	"testing"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
@@ -26,15 +27,17 @@ import (
 	"knative.dev/networking/pkg/apis/networking"
 	"knative.dev/networking/pkg/apis/networking/v1alpha1"
 	"knative.dev/networking/test"
+	"knative.dev/networking/test/conformance"
 	"knative.dev/pkg/reconciler"
 )
 
 // TestIngressClass verifies that kingress does not pick ingress up when ingress.class annotation is incorrect.
-func TestIngressClass(t *test.T) {
-	t.Parallel()
+func TestIngressClass(ctx context.Context, tt *testing.T) {
+	tt.Parallel()
+	t := conformance.TFromContext(ctx)
 
 	// Create a backend service to create valid ingress except for invalid ingress.class.
-	name, port, _ := CreateRuntimeService(t.C, t, t.Clients, networking.ServicePortNameHTTP1)
+	name, port, _ := CreateRuntimeService(ctx, t, networking.ServicePortNameHTTP1)
 	ingressBackend := &v1alpha1.IngressBackend{
 		ServiceName:      name,
 		ServiceNamespace: t.TestNamespace,
@@ -58,33 +61,32 @@ func TestIngressClass(t *test.T) {
 	}}
 
 	for _, c := range cases {
-		t.Run(c.name, func(t *test.T) {
-			verifyIngressWithAnnotations(t.C, t, t.Clients, c.annotations, ingressBackend)
+		t.Run(c.name, func(ttt *testing.T) {
+			t := t.Instance(ttt) // TODO: this will not work...
+			verifyIngressWithAnnotations(ctx, t, c.annotations, ingressBackend)
 		})
 	}
 
 }
 
-func verifyIngressWithAnnotations(ctx context.Context, t *test.T, clients *test.Clients,
-	annotations map[string]string, backend *v1alpha1.IngressBackend) {
+func verifyIngressWithAnnotations(ctx context.Context, t *test.T, annotations map[string]string, backend *v1alpha1.IngressBackend) {
 	t.Helper()
 
 	// createIngress internally sets hooks to delete the ingress,
 	// so we can ignore `cancel` here.
-	original, _ := createIngress(ctx, t, clients,
-		v1alpha1.IngressSpec{
-			Rules: []v1alpha1.IngressRule{{
-				Hosts:      []string{backend.ServiceName + ".example.com"},
-				Visibility: v1alpha1.IngressVisibilityExternalIP,
-				HTTP: &v1alpha1.HTTPIngressRuleValue{
-					Paths: []v1alpha1.HTTPIngressPath{{
-						Splits: []v1alpha1.IngressBackendSplit{{
-							IngressBackend: *backend,
-						}},
+	original, _ := createIngress(ctx, t, v1alpha1.IngressSpec{
+		Rules: []v1alpha1.IngressRule{{
+			Hosts:      []string{backend.ServiceName + ".example.com"},
+			Visibility: v1alpha1.IngressVisibilityExternalIP,
+			HTTP: &v1alpha1.HTTPIngressRuleValue{
+				Paths: []v1alpha1.HTTPIngressPath{{
+					Splits: []v1alpha1.IngressBackendSplit{{
+						IngressBackend: *backend,
 					}},
-				},
-			}},
-		},
+				}},
+			},
+		}},
+	},
 		OverrideIngressAnnotation(annotations),
 	)
 
@@ -97,7 +99,7 @@ func verifyIngressWithAnnotations(ctx context.Context, t *test.T, clients *test.
 	case <-ticker.C:
 		var ing *v1alpha1.Ingress
 		err := reconciler.RetryTestErrors(func(attempts int) (err error) {
-			ing, err = clients.NetworkingClient.Ingresses.Get(ctx, original.Name, metav1.GetOptions{})
+			ing, err = t.Clients.NetworkingClient.Ingresses.Get(ctx, original.Name, metav1.GetOptions{})
 			return err
 		})
 		if err != nil {

@@ -17,17 +17,21 @@ limitations under the License.
 package ingress
 
 import (
+	"context"
+	"testing"
+
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"knative.dev/networking/pkg/apis/networking"
 	"knative.dev/networking/pkg/apis/networking/v1alpha1"
-	"knative.dev/networking/test"
+	"knative.dev/networking/test/conformance"
 )
 
 // TestMultipleHosts verifies that an Ingress can respond to multiple hosts.
-func TestMultipleHosts(t *test.T) {
-	t.Parallel()
+func TestMultipleHosts(ctx context.Context, tt *testing.T) {
+	tt.Parallel()
+	t := conformance.TFromContext(ctx)
 
-	name, port, _ := CreateRuntimeService(t.C, t, t.Clients, networking.ServicePortNameHTTP1)
+	name, port, _ := CreateRuntimeService(ctx, t, networking.ServicePortNameHTTP1)
 
 	// TODO(mattmoor): Once .svc.cluster.local stops being a special case
 	// for Visibility, add it here.
@@ -45,7 +49,7 @@ func TestMultipleHosts(t *test.T) {
 	}
 
 	// Create a simple Ingress over the Service.
-	_, client, _ := CreateIngressReady(t.C, t, t.Clients, v1alpha1.IngressSpec{
+	_, client, _ := CreateIngressReady(ctx, t, v1alpha1.IngressSpec{
 		Rules: []v1alpha1.IngressRule{{
 			Hosts:      hosts,
 			Visibility: v1alpha1.IngressVisibilityExternalIP,
@@ -64,6 +68,6 @@ func TestMultipleHosts(t *test.T) {
 	})
 
 	for _, host := range hosts {
-		RuntimeRequest(t.C, t, client, "http://"+host)
+		RuntimeRequest(ctx, t, client, "http://"+host)
 	}
 }

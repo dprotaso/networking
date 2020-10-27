@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"testing"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
@@ -31,19 +32,21 @@ import (
 	"k8s.io/apimachinery/pkg/util/sets"
 	"knative.dev/networking/pkg/apis/networking/v1alpha1"
 	"knative.dev/networking/test"
+	"knative.dev/networking/test/conformance"
 )
 
 // TestWebsocket verifies that websockets may be used via a simple Ingress.
-func TestWebsocket(t *test.T) {
-	t.Parallel()
+func TestWebsocket(ctx context.Context, tt *testing.T) {
+	tt.Parallel()
+	t := conformance.TFromContext(ctx)
 
 	const suffix = "- pong"
-	name, port, _ := CreateWebsocketService(t.C, t, t.Clients, suffix)
+	name, port, _ := CreateWebsocketService(ctx, t, suffix)
 
 	domain := name + ".example.com"
 
 	// Create a simple Ingress over the Service.
-	_, dialCtx, _ := createIngressReadyDialContext(t.C, t, t.Clients, v1alpha1.IngressSpec{
+	_, dialCtx, _ := createIngressReadyDialContext(ctx, t, v1alpha1.IngressSpec{
 		Rules: []v1alpha1.IngressRule{{
 			Hosts:      []string{domain},
 			Visibility: v1alpha1.IngressVisibilityExternalIP,
@@ -75,19 +78,20 @@ func TestWebsocket(t *test.T) {
 	defer conn.Close()
 
 	for i := 0; i < 100; i++ {
-		checkWebsocketRoundTrip(t.C, t, conn, suffix)
+		checkWebsocketRoundTrip(ctx, t, conn, suffix)
 	}
 }
 
 // TestWebsocketSplit verifies that websockets may be used across a traffic split.
-func TestWebsocketSplit(t *test.T) {
-	t.Parallel()
+func TestWebsocketSplit(ctx context.Context, tt *testing.T) {
+	tt.Parallel()
+	t := conformance.TFromContext(ctx)
 
 	const suffixBlue = "- blue"
-	blueName, bluePort, _ := CreateWebsocketService(t.C, t, t.Clients, suffixBlue)
+	blueName, bluePort, _ := CreateWebsocketService(ctx, t, suffixBlue)
 
 	const suffixGreen = "- green"
-	greenName, greenPort, _ := CreateWebsocketService(t.C, t, t.Clients, suffixGreen)
+	greenName, greenPort, _ := CreateWebsocketService(ctx, t, suffixGreen)
 
 	// The suffixes we expect to see.
 	want := sets.NewString(suffixBlue, suffixGreen)
@@ -95,7 +99,7 @@ func TestWebsocketSplit(t *test.T) {
 	// Create a simple Ingress over the Service.
 	name := test.ObjectNameForTest(t)
 	domain := name + ".example.com"
-	_, dialCtx, _ := createIngressReadyDialContext(t.C, t, t.Clients, v1alpha1.IngressSpec{
+	_, dialCtx, _ := createIngressReadyDialContext(ctx, t, v1alpha1.IngressSpec{
 		Rules: []v1alpha1.IngressRule{{
 			Hosts:      []string{domain},
 			Visibility: v1alpha1.IngressVisibilityExternalIP,
@@ -137,14 +141,14 @@ func TestWebsocketSplit(t *test.T) {
 		}
 		defer conn.Close()
 
-		suffix := findWebsocketSuffix(t.C, t, conn)
+		suffix := findWebsocketSuffix(ctx, t, conn)
 		if suffix == "" {
 			continue
 		}
 		got.Insert(suffix)
 
 		for j := 0; j < 10; j++ {
-			checkWebsocketRoundTrip(t.C, t, conn, suffix)
+			checkWebsocketRoundTrip(ctx, t, conn, suffix)
 		}
 
 		if want.Equal(got) {

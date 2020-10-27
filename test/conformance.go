@@ -24,7 +24,6 @@ import (
 
 	network "knative.dev/networking/pkg"
 	"knative.dev/pkg/system"
-	"knative.dev/reconciler-test/pkg/test"
 	"knative.dev/reconciler-test/pkg/test/environment"
 
 	// Mysteriously required to support GCP auth (required by k8s libs). Apparently just importing it is enough. @_@ side effects @_@. https://github.com/kubernetes/client-go/issues/242
@@ -67,10 +66,8 @@ const (
 	MinSplitPercentage = 0.25
 )
 
-var Init = test.Init
-
 type T struct {
-	test.T
+	*testing.T
 
 	Cluster environment.Cluster
 	Images  environment.Images
@@ -91,13 +88,11 @@ type T struct {
 	SkipTests        sets.String // Indicates the test names we want to skip in alpha or beta features.
 }
 
-func (t *T) AddFlags(fs *flag.FlagSet) {
-	t.T.AddFlags(fs)
-
-	t.Cluster.AddFlags(fs)
-	t.Images.AddFlags(fs)
-	t.Ingress.AddFlags(fs)
-	t.Spoof.AddFlags(fs)
+func (t *T) InitFlags(fs *flag.FlagSet) {
+	t.Cluster.InitFlags(fs)
+	t.Images.InitFlags(fs)
+	t.Ingress.InitFlags(fs)
+	t.Spoof.InitFlags(fs)
 
 	fs.StringVar(&t.TestNamespace, "env.test-namespace", ServingNamespace,
 		"Provide the namespace where test resources will be created")
@@ -145,38 +140,6 @@ func (t *T) AddFlags(fs *flag.FlagSet) {
 		"Set this flag to the tests you want to skip in alpha or beta features. Accepts a comma separated list.")
 }
 
-func (t *T) Setup(tt *testing.T) {
-	cfg := t.Cluster.ClientConfig()
-	cfg.QPS = 100
-	cfg.Burst = 200
-
-	// TODO - setup logstream
-	var err error
-	t.Clients, err = NewClientsFromConfig(cfg, t.TestNamespace)
-
-	if err != nil {
-		t.Fatal("Failed to create clients", err)
-	}
-}
-
-func (t *T) Alpha(name string, f interface{}) bool {
-	if t.SkipTests.Has(name) {
-		f = func(t *test.T) {
-			t.Skip("test explicitly skipped via flag")
-		}
-	}
-	return t.T.Alpha(name, f)
-}
-
-func (t *T) Beta(name string, f interface{}) bool {
-	if t.SkipTests.Has(name) {
-		f = func(t *test.T) {
-			t.Skip("test explicitly skipped via flag")
-		}
-	}
-	return t.T.Beta(name, f)
-}
-
 type commaVar struct {
 	set *sets.String
 }
@@ -189,4 +152,19 @@ func (c commaVar) Set(value string) error {
 
 func (c commaVar) String() string {
 	return strings.Join(c.set.List(), ", ")
+}
+
+func (t *T) Instance(tt *testing.T) *T {
+	cfg := t.Cluster.ClientConfig()
+	cfg.QPS = 100
+	cfg.Burst = 200
+
+	// TODO - setup logstream
+	var err error
+	t.Clients, err = NewClientsFromConfig(cfg, t.TestNamespace)
+
+	if err != nil {
+		tt.Fatal("Failed to create clients", err)
+	}
+	return t // TODO: this totally does not work, we need to clone this struct, but YOLO for now.
 }
